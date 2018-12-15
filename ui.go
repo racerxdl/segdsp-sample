@@ -155,8 +155,15 @@ func buildSideMenu(win *glfw.Window, ctx *nk.Context) {
 			size := nk.NkVec2(nk.NkWidgetWidth(ctx), 400)
 			lastAntenna := antenna
 			nk.NkComboboxString(ctx, antennaStringData, &antenna, antennaCount, 20, size)
+			var isR = IsRunning()
 			if lastAntenna != antenna && dev != nil  {
+				if isR {
+					Stop()
+				}
 				dev.RXChannels[channel].SetAntenna(int(antenna))
+				if isR {
+					Start()
+				}
 			}
 		}
 	}

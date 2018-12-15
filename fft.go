@@ -52,7 +52,6 @@ func drawGrid(gc *draw2dimg.GraphicContext, fftOffset, fftScale, width int) {
 	// region Draw Frequency Scale Grid
 
 	// endregion
-	gc.Close()
 	gc.Stroke()
 	gc.Restore()
 }
@@ -105,12 +104,14 @@ func init() {
 
 func Gen() {
 	// region Compute FFT
+	samplesMtx.Lock()
 	localSamples := make([]complex64, fftSize)
 	copy(localSamples, fftSamples)
 
 	if len(window) != len(localSamples) {
 		window = dsp.BlackmanHarris(int(fftSize), 61)
 	}
+	samplesMtx.Unlock()
 
 	for j := 0; j < int(fftSize); j++ {
 		var s = localSamples[j]
@@ -124,13 +125,24 @@ func Gen() {
 	fftReal := make([]float32, len(fftResult))
 	if fftCache == nil || len(fftCache) != len(fftReal) {
 		fftCache = make([]float32, len(fftReal))
+		for i := 0; i < len(fftReal); i++ {
+			fftCache[i] = 0
+		}
 	}
 
+	var lastV = float32(0)
 	for i := 0; i < len(fftResult); i++ {
 		// Convert FFT to Power in dB
 		var v = tools.ComplexAbsSquared(fftResult[i]) * float32(1.0 / sampleRate)
 		fftReal[i] = float32(10 * math.Log10(float64(v)))
 		fftReal[i] = (fftCache[i] * (acc - 1) + fftReal[i]) / acc
+		if tools.IsNaN(fftReal[i]) {
+			fftReal[i] = 0
+		}
+		if i > 0 {
+			fftReal[i] = lastV * 0.4 + fftReal[i] * 0.6
+		}
+		lastV = fftReal[i]
 		fftCache[i] = fftReal[i]
 	}
 

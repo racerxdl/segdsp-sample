@@ -21,10 +21,14 @@ const (
 )
 
 func init() {
-	runtime.LockOSThread()
+	frameTex = -1
+	for i := 0; i < len(fftSamples); i++ {
+		fftSamples[i] = complex64(0)
+	}
 }
 
 func main() {
+	runtime.LockOSThread()
 	if err := glfw.Init(); err != nil {
 		log.Fatalln(err)
 	}
@@ -60,6 +64,7 @@ func main() {
 	go func() {
 		<-exitC
 		log.Println("Got SIGTERM!")
+		go Stop()
 		<-doneC
 	}()
 
@@ -69,7 +74,8 @@ func main() {
 
 	fpsTicker := time.NewTicker(time.Second / 60)
 
-	//go Gen()
+	Gen()
+	frameImg, frameTex = rgbaTex(frameTex, img)
 	go InitializeLimeSDR()
 
 	for {

@@ -17,6 +17,7 @@ var antenna int32
 var antennaStringData = ""
 var antennaList []string
 var antennaCount int32
+var centerFreq float64
 var fftSizes = "128\x00256\x00512\x001024\x002048\x004096\x008192\x0016384"
 var fftSizesLen = int32(len(strings.Split(fftSizes, "\x00")))
 
@@ -72,6 +73,7 @@ func InitializeLimeSDR() {
 	channel = 0
 	sampleRate = 10e6
 	antenna = 0
+	centerFreq = 106.3e6
 
 	dev.SetCallback(OnSamples)
 	dev.SetSampleRate(sampleRate, 4)
@@ -79,7 +81,7 @@ func InitializeLimeSDR() {
 		SetAntenna(int(antenna)).
 		SetGainNormalized(gain).
 		SetLPF(lpf).
-		SetCenterFrequency(106300000).
+		SetCenterFrequency(centerFreq).
 		EnableLPF().
 		Enable()
 
