@@ -79,7 +79,6 @@ func DrawLine(x0, y0, x1, y1 float32, color color.Color, img *image.RGBA) {
 	}
 }
 
-
 func init() {
 	fontBytes := MustAsset("assets/FreeSans.ttf")
 	loadedFont, err := truetype.Parse(fontBytes)
@@ -133,14 +132,14 @@ func Gen() {
 	var lastV = float32(0)
 	for i := 0; i < len(fftResult); i++ {
 		// Convert FFT to Power in dB
-		var v = tools.ComplexAbsSquared(fftResult[i]) * float32(1.0 / sampleRate)
+		var v = tools.ComplexAbsSquared(fftResult[i]) * float32(1.0/sampleRate)
 		fftReal[i] = float32(10 * math.Log10(float64(v)))
-		fftReal[i] = (fftCache[i] * (acc - 1) + fftReal[i]) / acc
+		fftReal[i] = (fftCache[i]*(acc-1) + fftReal[i]) / acc
 		if tools.IsNaN(fftReal[i]) {
 			fftReal[i] = 0
 		}
 		if i > 0 {
-			fftReal[i] = lastV * 0.4 + fftReal[i] * 0.6
+			fftReal[i] = lastV*0.4 + fftReal[i]*0.6
 		}
 		lastV = fftReal[i]
 		fftCache[i] = fftReal[i]
@@ -162,10 +161,10 @@ func Gen() {
 	for i := 0; i < len(fftReal); i++ {
 		var iPos = (i + len(fftReal)/2) % len(fftReal)
 		var s = float32(fftReal[iPos])
-		var v = float32((fftOffset) - s) * float32(fftScale)
+		var v = float32((fftOffset)-s) * float32(fftScale)
 		var x = float32(i) / widthScale
 		if i != 0 {
-			DrawLine(lastX, lastY, x, v, color.RGBA{R:0, G:127, B:127, A: 255}, img)
+			DrawLine(lastX, lastY, x, v, color.RGBA{R: 0, G: 127, B: 127, A: 255}, img)
 		}
 		lastX = x
 		lastY = v

@@ -29,7 +29,7 @@ var dspLoadError = ""
 var isRunning = false
 
 func OnSamples(data []complex64, channel int, timestamp uint64) {
-	if time.Since(lastFFT) > time.Second / 60 {
+	if time.Since(lastFFT) > time.Second/60 {
 		samplesMtx.Lock()
 		defer samplesMtx.Unlock()
 		fftSamples = data[:fftSize]
@@ -71,7 +71,7 @@ func InitializeLimeSDR() {
 	gain = 0.4
 	lpf = 10e6
 	channel = 0
-	sampleRate = 10e6
+	sampleRate = 5e6
 	antenna = 0
 	centerFreq = 106.3e6
 

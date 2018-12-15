@@ -28,6 +28,7 @@ func init() {
 }
 
 func main() {
+	//defer profile.Start().Stop()
 	runtime.LockOSThread()
 	if err := glfw.Init(); err != nil {
 		log.Fatalln(err)

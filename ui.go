@@ -61,14 +61,14 @@ func InitializeFonts() {
 	var freeMonoBytes = MustAsset("assets/FreeMono.ttf")
 	sansAtlas = nk.NewFontAtlas()
 	nk.NkFontStashBegin(&sansAtlas)
-	for i := 8; i <= 64; i+=2 {
+	for i := 8; i <= 64; i += 2 {
 		var fontName = fmt.Sprintf("sans%d", i)
 		fonts[fontName] = nk.NkFontAtlasAddFromBytes(sansAtlas, freeSansBytes, float32(i), nil)
 	}
 	nk.NkFontStashEnd()
 	monoAtlas = nk.NewFontAtlas()
 	nk.NkFontStashBegin(&monoAtlas)
-	for i := 8; i <= 64; i+=2 {
+	for i := 8; i <= 64; i += 2 {
 		var fontName = fmt.Sprintf("mono%d", i)
 		fonts[fontName] = nk.NkFontAtlasAddFromBytes(monoAtlas, freeMonoBytes, float32(i), nil)
 	}
@@ -96,8 +96,8 @@ func rgbaTex(tex int32, rgba *image.RGBA) (nk.Image, int32) {
 func buildSideMenu(win *glfw.Window, ctx *nk.Context) {
 	nk.NkStyleSetFont(ctx, fonts["sans16"].Handle())
 	width, height := win.GetSize()
-	bounds := nk.NkRect(float32(width) - 256, 0, 256, float32(height))
-	update := nk.NkBegin(ctx, "Configuration", bounds, nk.WindowTitle | nk.WindowBorder)
+	bounds := nk.NkRect(float32(width)-256, 0, 256, float32(height))
+	update := nk.NkBegin(ctx, "Configuration", bounds, nk.WindowTitle|nk.WindowBorder)
 	if update > 0 {
 		nk.NkLayoutRowStatic(ctx, 32, int32(32), 1)
 		{
@@ -130,7 +130,7 @@ func buildSideMenu(win *glfw.Window, ctx *nk.Context) {
 		{
 			size := nk.NkVec2(nk.NkWidgetWidth(ctx), 400)
 			nk.NkComboboxString(ctx, fftSizes, &selectedFFTSize, int32(fftSizesLen), 20, size)
-			fftSize = int32(1 << uint32(selectedFFTSize + 7))
+			fftSize = int32(1 << uint32(selectedFFTSize+7))
 		}
 
 		nk.NkLayoutRowDynamic(ctx, 20, 1)
@@ -156,7 +156,7 @@ func buildSideMenu(win *glfw.Window, ctx *nk.Context) {
 			lastAntenna := antenna
 			nk.NkComboboxString(ctx, antennaStringData, &antenna, antennaCount, 20, size)
 			var isR = IsRunning()
-			if lastAntenna != antenna && dev != nil  {
+			if lastAntenna != antenna && dev != nil {
 				if isR {
 					Stop()
 				}
@@ -173,7 +173,7 @@ func buildSideMenu(win *glfw.Window, ctx *nk.Context) {
 func buildFFTWindow(win *glfw.Window, ctx *nk.Context) {
 	width, height := win.GetSize()
 	nk.NkStyleSetFont(ctx, fonts["sans16"].Handle())
-	bounds := nk.NkRect(0, 0, float32(width) - 256, float32(height))
+	bounds := nk.NkRect(0, 0, float32(width)-256, float32(height))
 	update := nk.NkBegin(ctx, "FFT Window", bounds, nk.WindowTitle)
 	if update > 0 {
 		if isUpdated {
@@ -197,25 +197,25 @@ func DrawLoading(win *glfw.Window, ctx *nk.Context) {
 	y := (float32(wh) / 2) - (height / 2)
 
 	bounds := nk.NkRect(x, y, width, height)
-	update := nk.NkBegin(ctx, "Loading Window", bounds, nk.WindowNoScrollbar | nk.WindowBorder)
+	update := nk.NkBegin(ctx, "Loading Window", bounds, nk.WindowNoScrollbar|nk.WindowBorder)
 	pad := ctx.Style().Window().Padding()
 
 	if update > 0 {
 		size := nk.NkWindowGetContentRegionSize(ctx)
-		resultW := size.X() - pad.X() * 2
-		resultH := size.Y() - pad.Y() * 2
+		resultW := size.X() - pad.X()*2
+		resultH := size.Y() - pad.Y()*2
 		if dspLoadError == "" {
 			nk.NkLayoutRowStatic(ctx, resultH, int32(resultW), 1)
 			{
 				nk.NkStyleSetFont(ctx, fonts["sans64"].Handle())
-				nk.NkLabel(ctx, "Loading", nk.TextAlignCentered | nk.TextAlignMiddle)
+				nk.NkLabel(ctx, "Loading", nk.TextAlignCentered|nk.TextAlignMiddle)
 				nk.NkStyleSetFont(ctx, fonts["sans16"].Handle())
 			}
 		} else {
 			nk.NkLayoutRowStatic(ctx, 70, int32(resultW), 1)
 			{
 				nk.NkStyleSetFont(ctx, fonts["sans32"].Handle())
-				nk.NkLabel(ctx, dspLoadError, nk.TextAlignCentered | nk.TextAlignMiddle)
+				nk.NkLabel(ctx, dspLoadError, nk.TextAlignCentered|nk.TextAlignMiddle)
 				nk.NkStyleSetFont(ctx, fonts["sans16"].Handle())
 			}
 			nk.NkLayoutRowStatic(ctx, resultH-70-pad.Y()*2, int32(resultW), 1)
