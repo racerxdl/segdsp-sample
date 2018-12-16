@@ -14,7 +14,7 @@ import (
 
 const (
 	winWidth  = 1280
-	winHeight = 800
+	winHeight = 580
 
 	maxVertexBuffer  = 512 * 1024
 	maxElementBuffer = 128 * 1024
