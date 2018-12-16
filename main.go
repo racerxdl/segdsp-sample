@@ -37,7 +37,7 @@ func main() {
 	glfw.WindowHint(glfw.ContextVersionMinor, 2)
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
-	win, err := glfw.CreateWindow(winWidth, winHeight, "FFT Test", nil, nil)
+	win, err := glfw.CreateWindow(winWidth, winHeight, "SegDSP Sample Application", nil, nil)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -66,6 +66,7 @@ func main() {
 		<-exitC
 		log.Println("Got SIGTERM!")
 		go Stop()
+		onDspClose()
 		<-doneC
 	}()
 
