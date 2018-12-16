@@ -67,6 +67,7 @@ func main() {
 		log.Println("Got SIGTERM!")
 		go Stop()
 		onDspClose()
+		win.SetShouldClose(true)
 		<-doneC
 	}()
 

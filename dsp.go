@@ -164,11 +164,11 @@ func InitializeLimeSDR() {
 		return
 	}
 
-	log.Printf("Audio Device: %s\n", h.DefaultOutputDevice.Name)
-
-	for i := 0; i < len(h.Devices); i++ {
-		log.Printf("%d: %s\n", i, h.Devices[i].Name)
-	}
+	//log.Printf("Audio Device: %s\n", h.DefaultOutputDevice.Name)
+	//
+	//for i := 0; i < len(h.Devices); i++ {
+	//	log.Printf("%d: %s\n", i, h.Devices[i].Name)
+	//}
 
 	p := portaudio.HighLatencyParameters(nil, h.DefaultOutputDevice)
 	p.Input.Channels = 0
