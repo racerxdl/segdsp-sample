@@ -10,6 +10,9 @@ import (
 	"image"
 	"image/draw"
 	"image/png"
+	"log"
+	"strconv"
+	"strings"
 	"sync"
 	"unsafe"
 )
@@ -93,6 +96,8 @@ func rgbaTex(tex int32, rgba *image.RGBA) (nk.Image, int32) {
 	return nk.NkImageId(int32(t)), int32(t)
 }
 
+var centerFreqText = ""
+
 func buildSideMenu(win *glfw.Window, ctx *nk.Context) {
 	nk.NkStyleSetFont(ctx, fonts["sans16"].Handle())
 	width, height := win.GetSize()
@@ -163,6 +168,35 @@ func buildSideMenu(win *glfw.Window, ctx *nk.Context) {
 				dev.RXChannels[channel].SetAntenna(int(antenna))
 				if isR {
 					Start()
+				}
+			}
+		}
+
+		nk.NkLayoutRowDynamic(ctx, 20, 1)
+		{
+			nk.NkLabel(ctx, fmt.Sprintf("Frequency: %.0f", centerFreq), nk.TextLeft)
+		}
+		nk.NkLayoutRowDynamic(ctx, 25, 1)
+		{
+			var buff = make([]byte, 32)
+			if centerFreqText == "" {
+				centerFreqText = fmt.Sprintf("%d", int(centerFreq))
+			}
+			copy(buff, []byte(centerFreqText))
+			nk.NkEditStringZeroTerminated(ctx, nk.EditSimple, buff, 32, nk.NkFilterFloat)
+			centerFreqText = strings.Split(string(buff), "\x00")[0]
+			if nk.NkInputIsKeyPressed(ctx.Input(), nk.KeyEnter) > 0 {
+				f, err := strconv.ParseFloat(centerFreqText, 32)
+				if err != nil {
+					log.Printf("Error: %s\n", err)
+					centerFreqText = fmt.Sprintf("%d", int(centerFreq))
+				} else if centerFreq < 3.8e9 && centerFreq >= 100e3 {
+					centerFreq = f
+					if dev != nil {
+						dev.RXChannels[channel].SetCenterFrequency(centerFreq)
+					}
+				} else {
+					log.Printf("Invalid Frequency: %f\n", f)
 				}
 			}
 		}
