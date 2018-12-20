@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/gordonklaus/portaudio"
+	"github.com/myriadrf/limedrv"
 	"github.com/racerxdl/go.fifo"
-	"github.com/racerxdl/limedrv"
 	"github.com/racerxdl/segdsp/demodcore"
 	"github.com/racerxdl/segdsp/dsp"
 	"log"
@@ -90,11 +90,13 @@ func Stop() {
 	if dspLoaded && isRunning {
 		log.Println("Stopping DSP")
 		dev.Stop()
+		log.Println("Stopping Audio")
 		err := audioStream.Stop()
 		if err != nil {
 			log.Println("Error stopping audio: ", err)
 		}
 		isRunning = false
+		log.Println("Stopped")
 	}
 }
 
@@ -142,6 +144,8 @@ func InitializeLimeSDR() {
 
 	antennaCount = int32(len(dev.RXChannels[channel].Antennas))
 	antennaList = make([]string, antennaCount)
+
+	frequencySelector.SetFrequency(uint32(centerFreq))
 
 	for i := 0; i < len(dev.RXChannels[channel].Antennas); i++ {
 		var ant = dev.RXChannels[channel].Antennas[i]
@@ -193,11 +197,13 @@ func InitializeLimeSDR() {
 }
 
 func onDspClose() {
-	err := audioStream.Close()
-	if err != nil {
-		log.Printf("Error closing stream: %s", err)
+	if audioStream != nil {
+		err := audioStream.Close()
+		if err != nil {
+			log.Printf("Error closing stream: %s", err)
+		}
 	}
-	err = portaudio.Terminate()
+	err := portaudio.Terminate()
 	if err != nil {
 		log.Printf("Error terminating portaudio: %s", err)
 	}

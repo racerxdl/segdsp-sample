@@ -4,6 +4,7 @@ import (
 	"github.com/go-gl/gl/v3.2-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/golang-ui/nuklear/nk"
+	//"github.com/pkg/profile"
 	"log"
 	"os"
 	"os/signal"
@@ -14,7 +15,7 @@ import (
 
 const (
 	winWidth  = 1280
-	winHeight = 580
+	winHeight = 620
 
 	maxVertexBuffer  = 512 * 1024
 	maxElementBuffer = 128 * 1024

@@ -31,3 +31,13 @@ func toNotationUnit(v float32) (float32, string) {
 	value = float32(int(value*1e2)) / 1e2
 	return value, unit
 }
+
+func PowInt(a, b uint32) uint32 {
+	var s = uint32(1)
+
+	for i := uint32(0); i < b; i++ {
+		s *= a
+	}
+
+	return s
+}

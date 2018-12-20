@@ -31,6 +31,7 @@ var stopButton nk.Image
 var stopButtonTex int32
 var monoAtlas *nk.FontAtlas
 var sansAtlas *nk.FontAtlas
+var frequencySelector = MakeUIFrequencySelector(100e3, 3.8e9)
 
 var drawLock = sync.Mutex{}
 
@@ -57,6 +58,7 @@ func InitializeImages() {
 	m = image.NewRGBA(img.Bounds())
 	draw.Draw(m, m.Bounds(), img, img.Bounds().Min, draw.Over)
 	stopButton, stopButtonTex = rgbaTex(stopButtonTex, m)
+	InitFrequencySelectorImages()
 }
 
 func InitializeFonts() {
@@ -195,6 +197,7 @@ func buildSideMenu(win *glfw.Window, ctx *nk.Context) {
 					if dev != nil {
 						dev.RXChannels[channel].SetCenterFrequency(centerFreq)
 					}
+					frequencySelector.SetFrequency(uint32(centerFreq))
 				} else {
 					log.Printf("Invalid Frequency: %f\n", f)
 				}
@@ -208,8 +211,9 @@ func buildFFTWindow(win *glfw.Window, ctx *nk.Context) {
 	width, height := win.GetSize()
 	nk.NkStyleSetFont(ctx, fonts["sans16"].Handle())
 	bounds := nk.NkRect(0, 0, float32(width)-256, float32(height))
-	update := nk.NkBegin(ctx, "FFT Window", bounds, nk.WindowTitle)
+	update := nk.NkBegin(ctx, "FFT Window", bounds, 0)
 	if update > 0 {
+		frequencySelector.ShowAndUpdate(ctx)
 		if isUpdated {
 			frameImg, frameTex = rgbaTex(frameTex, img)
 			isUpdated = false
@@ -217,6 +221,12 @@ func buildFFTWindow(win *glfw.Window, ctx *nk.Context) {
 		nk.NkLayoutRowDynamic(ctx, imgHeight, 1)
 		{
 			nk.NkImage(ctx, frameImg)
+		}
+		if float64(frequencySelector.GetFrequency()) != centerFreq {
+			centerFreq = float64(frequencySelector.GetFrequency())
+			if dev != nil {
+				dev.RXChannels[channel].SetCenterFrequency(centerFreq)
+			}
 		}
 	}
 	nk.NkEnd(ctx)
