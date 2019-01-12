@@ -26,6 +26,7 @@ func init() {
 	for i := 0; i < len(fftSamples); i++ {
 		fftSamples[i] = complex64(0)
 	}
+	dspLoaded.Set(false)
 }
 
 func main() {

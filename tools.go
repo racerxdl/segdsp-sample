@@ -1,5 +1,7 @@
 package main
 
+import "sync/atomic"
+
 var subMultiples = []string{"", "m", "µ", "n", "p", "f", "a", "z", "y"}
 var multiples = []string{"", "k", "M", "G", "T", "P", "E", "Z", "Y"}
 
@@ -40,4 +42,21 @@ func PowInt(a, b uint32) uint32 {
 	}
 
 	return s
+}
+
+type TAtomBool struct{ flag int32 }
+
+func (b *TAtomBool) Set(value bool) {
+	var i int32 = 0
+	if value {
+		i = 1
+	}
+	atomic.StoreInt32(&(b.flag), int32(i))
+}
+
+func (b *TAtomBool) Get() bool {
+	if atomic.LoadInt32(&(b.flag)) != 0 {
+		return true
+	}
+	return false
 }

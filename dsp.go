@@ -30,7 +30,7 @@ var fftSizesLen = int32(len(strings.Split(fftSizes, "\x00")))
 var selectedFFTSize = int32(5)
 var dev *limedrv.LMSDevice
 
-var dspLoaded = false
+var dspLoaded TAtomBool
 var dspLoadError = ""
 var isRunning = false
 
@@ -46,10 +46,12 @@ func OnSamples(data []complex64, _ int, _ uint64) {
 }
 
 func DoFFT(data []complex64) {
+	samplesMtx.Lock()
+	defer samplesMtx.Unlock()
 	if time.Since(lastFFT) > time.Second/60 {
-		samplesMtx.Lock()
-		defer samplesMtx.Unlock()
+		fftLock.Lock()
 		fftSamples = data[:fftSize]
+		fftLock.Unlock()
 		data = dcFilter.Work(fftSamples)
 		go Gen()
 		UpdateVisuals()
@@ -58,6 +60,8 @@ func DoFFT(data []complex64) {
 }
 
 func DoDemod(samples []complex64) {
+	samplesMtx.Lock()
+	defer samplesMtx.Unlock()
 	out := demodulator.Work(samples)
 	if out != nil {
 		var o = out.(demodcore.DemodData)
@@ -75,7 +79,7 @@ func UpdateVisuals() {
 }
 
 func Start() {
-	if dspLoaded && !isRunning {
+	if dspLoaded.Get() && !isRunning {
 		log.Println("Starting DSP")
 		dev.Start()
 		err := audioStream.Start()
@@ -87,7 +91,7 @@ func Start() {
 }
 
 func Stop() {
-	if dspLoaded && isRunning {
+	if dspLoaded.Get() && isRunning {
 		log.Println("Stopping DSP")
 		dev.Stop()
 		log.Println("Stopping Audio")
@@ -105,8 +109,8 @@ func IsRunning() bool {
 }
 
 func ProcessAudio(out []float32) {
-	if audioFifo.UnsafeLen() > 0 {
-		var z = audioFifo.UnsafeNext().([]float32)
+	if audioFifo.Len() > 0 {
+		var z = audioFifo.Next().([]float32)
 		copy(out, z)
 	} else {
 		for i := range out {
@@ -193,7 +197,7 @@ func InitializeLimeSDR() {
 		return
 	}
 
-	dspLoaded = true
+	dspLoaded.Set(true)
 }
 
 func onDspClose() {

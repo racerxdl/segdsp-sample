@@ -126,7 +126,9 @@ func buildSideMenu(win *glfw.Window, ctx *nk.Context) {
 
 		nk.NkLayoutRowDynamic(ctx, 20, 1)
 		{
+			fftLock.Lock()
 			acc = nk.NkSlideFloat(ctx, 1, acc, 16, 0.1)
+			fftLock.Unlock()
 		}
 
 		nk.NkLayoutRowDynamic(ctx, 20, 1)
@@ -137,7 +139,9 @@ func buildSideMenu(win *glfw.Window, ctx *nk.Context) {
 		{
 			size := nk.NkVec2(nk.NkWidgetWidth(ctx), 400)
 			nk.NkComboboxString(ctx, fftSizes, &selectedFFTSize, int32(fftSizesLen), 20, size)
+			fftLock.Lock()
 			fftSize = int32(1 << uint32(selectedFFTSize+7))
+			fftLock.Unlock()
 		}
 
 		nk.NkLayoutRowDynamic(ctx, 20, 1)
@@ -278,7 +282,7 @@ func gfxMain(win *glfw.Window, ctx *nk.Context, state *UIState) {
 	defer drawLock.Unlock()
 	width, height := win.GetSize()
 	nk.NkPlatformNewFrame()
-	if !dspLoaded {
+	if !dspLoaded.Get() {
 		DrawLoading(win, ctx)
 	} else {
 		buildSideMenu(win, ctx)

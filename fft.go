@@ -189,31 +189,46 @@ func DrawLine(x0, y0, x1, y1 float32, color color.Color, img *image.RGBA) {
 	}
 }
 
+var fftLock = sync.Mutex{}
+
+var _fftCache = make([]float32, len(fftCache))
+
 func Gen() {
+	// region copy settings to local
+	fftLock.Lock()
+	var _fftSize = fftSize
+	var _acc = acc
+	if fftCache != nil {
+		if len(_fftCache) != len(fftCache) {
+			_fftCache = make([]float32, len(fftCache))
+		}
+		copy(_fftCache, fftCache)
+	}
+	fftLock.Unlock()
+	// endregion
 	// region Compute FFT
 	samplesMtx.Lock()
-	localSamples := make([]complex64, fftSize)
+	localSamples := make([]complex64, _fftSize)
 	copy(localSamples, fftSamples)
 
 	if len(window) != len(localSamples) {
-		window = dsp.BlackmanHarris(int(fftSize), 61)
+		window = dsp.BlackmanHarris(int(_fftSize), 61)
 	}
 	samplesMtx.Unlock()
 
-	for j := 0; j < int(fftSize); j++ {
+	for j := 0; j < int(_fftSize); j++ {
 		var s = localSamples[j]
 		var r = real(s) * float32(window[j])
 		var i = imag(s) * float32(window[j])
 		localSamples[j] = complex(r, i)
 	}
-
 	fftResult := fft.FFT(fftSamples)
 
 	fftReal := make([]float32, len(fftResult))
-	if fftCache == nil || len(fftCache) != len(fftReal) {
-		fftCache = make([]float32, len(fftReal))
+	if _fftCache == nil || len(_fftCache) != len(fftReal) {
+		_fftCache = make([]float32, len(fftReal))
 		for i := 0; i < len(fftReal); i++ {
-			fftCache[i] = 0
+			_fftCache[i] = 0
 		}
 	}
 
@@ -222,7 +237,7 @@ func Gen() {
 		// Convert FFT to Power in dB
 		var v = tools.ComplexAbsSquared(fftResult[i]) * float32(1.0/sampleRate)
 		fftReal[i] = float32(10 * math.Log10(float64(v)))
-		fftReal[i] = (fftCache[i]*(acc-1) + fftReal[i]) / acc
+		fftReal[i] = (_fftCache[i]*(_acc-1) + fftReal[i]) / _acc
 		if tools.IsNaN(fftReal[i]) {
 			fftReal[i] = 0
 		}
@@ -230,8 +245,15 @@ func Gen() {
 			fftReal[i] = lastV*0.4 + fftReal[i]*0.6
 		}
 		lastV = fftReal[i]
-		fftCache[i] = fftReal[i]
+		_fftCache[i] = fftReal[i]
 	}
+
+	fftLock.Lock()
+	if fftCache == nil || len(fftCache) != len(_fftCache) {
+		fftCache = make([]float32, len(_fftCache))
+	}
+	copy(fftCache, _fftCache)
+	fftLock.Unlock()
 
 	// endregion
 	// region Draw Image and Save
